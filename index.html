@@ -2,27 +2,19 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>写了吗</title>
-
-<!-- iOS PWA 支持 -->
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="写了吗">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="theme-color" content="#f4f6f8">
-
-<!-- iOS 桌面图标 -->
+<!-- iOS桌面图标 -->
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
-<link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png">
-<link rel="apple-touch-icon" sizes="167x167" href="icons/icon-167.png">
-<link rel="apple-touch-icon" sizes="152x152" href="icons/icon-152.png">
-
-<!-- PWA Manifest -->
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="icons/icon-512.png">
+<!-- PWA manifest -->
 <link rel="manifest" href="manifest.json">
-
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="写了吗">
 <style>
-*{box-sizing:border-box;margin:0;padding:0;font-family:system-ui, -apple-system, sans-serif;}
+*{box-sizing:border-box;margin:0;padding:0;font-family:system-ui, sans-serif;}
 :root{
   --bg:#f4f6f8;
   --card:#fff;
@@ -51,29 +43,13 @@
   --day-forget-text:#bbbbbb;
   --day-future:#333;
 }
-html, body {
-  -webkit-tap-highlight-color: transparent;
-  -webkit-touch-callout: none;
-  overscroll-behavior: none;
-}
-body{
-  background:var(--bg);
-  color:var(--text);
-  padding:20px;
-  padding-top: calc(20px + env(safe-area-inset-top));
-  padding-bottom: calc(20px + env(safe-area-inset-bottom));
-  max-width:700px;
-  margin:0 auto;
-  transition:background 0.3s,color 0.3s;
-  min-height:100vh;
-}
+body{background:var(--bg);color:var(--text);padding:20px;max-width:700px;margin:0 auto;transition:background 0.3s,color 0.3s;}
 .header{text-align:center;margin-bottom:24px;position:relative;}
 h1{font-size:32px;color:var(--text);margin-bottom:6px;}
 .subtitle{font-size:18px;color:var(--text-secondary);margin-bottom:20px;}
-#toggleDark{position:absolute;top:0;right:0;border:none;background:transparent;font-size:24px;cursor:pointer;padding:8px;}
+#toggleDark{position:absolute;top:0;right:0;border:none;background:transparent;font-size:24px;cursor:pointer;}
 .btns{display:flex;gap:16px;margin-bottom:28px;}
-button{flex:1;padding:18px 10px;font-size:18px;border-radius:12px;border:none;font-weight:bold;cursor:pointer;transition:transform 0.1s;}
-button:active{transform:scale(0.97);}
+button{flex:1;padding:18px 10px;font-size:18px;border-radius:12px;border:none;font-weight:bold;cursor:pointer;}
 .btn-wanna{background:#ffc864;color:#222;}
 .btn-done{background:#42b983;color:#fff;}
 .btn-forget{background:#999999;color:#fff;}
@@ -83,8 +59,8 @@ button:active{transform:scale(0.97);}
 .export-btn{margin-top:12px;padding:8px 14px;font-size:14px;background:#5271ff;color:#fff;border-radius:8px;flex:none;}
 .calendar-title{font-size:20px;margin-bottom:12px;text-align:center;color:var(--text);}
 .calendar{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;}
-.day-item{padding:12px 4px;text-align:center;border-radius:8px;background:var(--card);border:1px solid var(--border);cursor:pointer;user-select:none;font-size:15px;}
-.day-item:active{filter:brightness(0.9);}
+.day-item{padding:12px 4px;text-align:center;border-radius:8px;background:var(--card);border:1px solid var(--border);cursor:pointer;user-select:none;}
+.day-item:hover{filter:brightness(0.95);}
 .day-done{background:var(--day-done-bg);color:var(--day-done-text);border-color:#8fdf99;}
 .day-wanna{background:var(--day-wanna-bg);color:var(--day-wanna-text);border-color:#ffaaaa;}
 .day-forget{background:var(--day-forget-bg);color:var(--day-forget-text);border-color:#aaaaaa;}
@@ -104,7 +80,7 @@ button:active{transform:scale(0.97);}
 <div class="header">
 <button id="toggleDark">🌓</button>
 <h1>写了吗</h1>
-<div class="subtitle">取其精华 合成糟粕</div>
+<div class="subtitle">准备给学术圈一点小小的震撼</div>
 </div>
 
 <div class="btns">
@@ -196,7 +172,7 @@ const doneTexts = [
     "临床的积累化为文字，这才是医者的终极浪漫！",
     "今日的伏案，终会变成简历上亮眼的一笔！"
 ];
-// 哈哈哈，我给忘啦 文案
+// 新增：哈哈哈，我给忘啦 文案（阴阳风）
 const forgetTexts = [
     "好家伙，忙到直接把科研任务从大脑内存清空了！",
     "没事，病历、抢救、交班占满大脑，遗忘属于正常生理现象。",
@@ -216,7 +192,7 @@ const modal = document.getElementById('modal');
 const msgText = document.getElementById('msgText');
 const editModal = document.getElementById('editModal');
 const editDayTitle = document.getElementById('editDayTitle');
-let editTargetDay = null;
+let editTargetDay = null; // 当前要补打的日期
 
 function showModal(text){
     msgText.innerText = text;
@@ -249,11 +225,11 @@ function saveRecord(y,m,day,status){
     const key = `${y}-${m}`;
     const records = getRecords();
     if(!records[key]) records[key] = {};
-    records[key][day] = status;
+    records[key][day] = status; // done / wanna / forget
     localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
 }
 
-// 统计本月数据
+// 统计本月数据（新增忘记计数）
 function calcStat(){
     const {y,m} = getNow();
     const key = `${y}-${m}`;
@@ -329,6 +305,7 @@ function renderCalendar(){
             if(stat === 'done') div.classList.add('day-done');
             if(stat === 'wanna') div.classList.add('day-wanna');
             if(stat === 'forget') div.classList.add('day-forget');
+            // 点击过往日期打开补打卡
             div.onclick = ()=> openEditModal(d);
         }
         box.appendChild(div);
@@ -336,7 +313,18 @@ function renderCalendar(){
     calcStat();
 }
 
-// 补打卡按钮
+// 补打卡弹窗按钮【哈哈哈，我给忘啦】
+document.getElementById('editForget').onclick = function(){
+    if(editTargetDay === null) return;
+    const {y,m} = getNow();
+    saveRecord(y,m,editTargetDay,'forget');
+    const randomTxt = forgetTexts[Math.floor(Math.random() * forgetTexts.length)];
+    showModal(randomTxt);
+    closeEditModal();
+    renderCalendar();
+}
+
+// 补打卡原有按钮
 document.getElementById('editWanna').onclick = function(){
     if(editTargetDay === null) return;
     const {y,m} = getNow();
@@ -355,33 +343,6 @@ document.getElementById('editDone').onclick = function(){
     closeEditModal();
     renderCalendar();
 }
-document.getElementById('editForget').onclick = function(){
-    if(editTargetDay === null) return;
-    const {y,m} = getNow();
-    saveRecord(y,m,editTargetDay,'forget');
-    const randomTxt = forgetTexts[Math.floor(Math.random() * forgetTexts.length)];
-    showModal(randomTxt);
-    closeEditModal();
-    renderCalendar();
-}
-
-// 今日打卡按钮
-document.getElementById('btnWanna').onclick = function(){
-    const {y,m} = getNow();
-    const day = new Date().getDate();
-    saveRecord(y,m,day,'wanna');
-    const randomTxt = wannaTexts[Math.floor(Math.random() * wannaTexts.length)];
-    showModal(randomTxt);
-    renderCalendar();
-}
-document.getElementById('btnDone').onclick = function(){
-    const {y,m} = getNow();
-    const day = new Date().getDate();
-    saveRecord(y,m,day,'done');
-    const randomTxt = doneTexts[Math.floor(Math.random() * doneTexts.length)];
-    showModal(randomTxt);
-    renderCalendar();
-}
 
 // 深色模式切换
 const toggleDark = document.getElementById('toggleDark');
@@ -389,6 +350,7 @@ toggleDark.onclick = function(){
     document.body.classList.toggle('dark');
     localStorage.setItem('writeDark', document.body.classList.contains('dark'));
 }
+// 读取深色模式记忆
 if(localStorage.getItem('writeDark') === 'true'){
     document.body.classList.add('dark');
 }
