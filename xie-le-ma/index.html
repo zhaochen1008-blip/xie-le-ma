@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>写了吗</title>
+
+<!-- iOS PWA 支持 -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="写了吗">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#f4f6f8">
+
+<!-- iOS 桌面图标 -->
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png">
+<link rel="apple-touch-icon" sizes="167x167" href="icons/icon-167.png">
+<link rel="apple-touch-icon" sizes="152x152" href="icons/icon-152.png">
+
+<!-- PWA Manifest -->
+<link rel="manifest" href="manifest.json">
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:system-ui, -apple-system, sans-serif;}
+:root{
+  --bg:#f4f6f8;
+  --card:#fff;
+  --text:#222;
+  --text-secondary:#666;
+  --border:#ddd;
+  --day-done-bg:#c6efce;
+  --day-done-text:#006400;
+  --day-wanna-bg:#ffcece;
+  --day-wanna-text:#990000;
+  --day-forget-bg:#d8d8d8;
+  --day-forget-text:#444;
+  --day-future:#eee;
+}
+.dark{
+  --bg:#1a1a1a;
+  --card:#282828;
+  --text:#eee;
+  --text-secondary:#aaa;
+  --border:#444;
+  --day-done-bg:#1b4b24;
+  --day-done-text:#89e894;
+  --day-wanna-bg:#5c2020;
+  --day-wanna-text:#ffaaaa;
+  --day-forget-bg:#424242;
+  --day-forget-text:#bbbbbb;
+  --day-future:#333;
+}
+html, body {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  overscroll-behavior: none;
+}
+body{
+  background:var(--bg);
+  color:var(--text);
+  padding:20px;
+  padding-top: calc(20px + env(safe-area-inset-top));
+  padding-bottom: calc(20px + env(safe-area-inset-bottom));
+  max-width:700px;
+  margin:0 auto;
+  transition:background 0.3s,color 0.3s;
+  min-height:100vh;
+}
+.header{text-align:center;margin-bottom:24px;position:relative;}
+h1{font-size:32px;color:var(--text);margin-bottom:6px;}
+.subtitle{font-size:18px;color:var(--text-secondary);margin-bottom:20px;}
+#toggleDark{position:absolute;top:0;right:0;border:none;background:transparent;font-size:24px;cursor:pointer;padding:8px;}
+.btns{display:flex;gap:16px;margin-bottom:28px;}
+button{flex:1;padding:18px 10px;font-size:18px;border-radius:12px;border:none;font-weight:bold;cursor:pointer;transition:transform 0.1s;}
+button:active{transform:scale(0.97);}
+.btn-wanna{background:#ffc864;color:#222;}
+.btn-done{background:#42b983;color:#fff;}
+.btn-forget{background:#999999;color:#fff;}
+.stat-wrap{background:var(--card);padding:16px;border-radius:12px;margin-bottom:20px;border:1px solid var(--border);}
+.stat-title{font-weight:bold;margin-bottom:8px;font-size:17px;}
+.stat-row{display:flex;gap:16px;flex-wrap:wrap;font-size:16px;}
+.export-btn{margin-top:12px;padding:8px 14px;font-size:14px;background:#5271ff;color:#fff;border-radius:8px;flex:none;}
+.calendar-title{font-size:20px;margin-bottom:12px;text-align:center;color:var(--text);}
+.calendar{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;}
+.day-item{padding:12px 4px;text-align:center;border-radius:8px;background:var(--card);border:1px solid var(--border);cursor:pointer;user-select:none;font-size:15px;}
+.day-item:active{filter:brightness(0.9);}
+.day-done{background:var(--day-done-bg);color:var(--day-done-text);border-color:#8fdf99;}
+.day-wanna{background:var(--day-wanna-bg);color:var(--day-wanna-text);border-color:#ffaaaa;}
+.day-forget{background:var(--day-forget-bg);color:var(--day-forget-text);border-color:#aaaaaa;}
+.day-future{opacity:0.4;background:var(--day-future);cursor:not-allowed;}
+.tip-modal{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.4);display:none;align-items:center;justify-content:center;padding:20px;z-index:99;}
+.tip-box{background:var(--card);padding:30px 24px;border-radius:16px;max-width:420px;text-align:center;font-size:18px;line-height:1.7;color:var(--text);}
+.tip-box button{margin-top:18px;padding:10px 24px;font-size:16px;flex:none;}
+/*补打卡弹窗*/
+.edit-modal{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.4);display:none;align-items:center;justify-content:center;padding:20px;z-index:100;}
+.edit-box{background:var(--card);padding:24px;border-radius:16px;max-width:360px;text-align:center;color:var(--text);}
+.edit-box h3{margin-bottom:16px;}
+.edit-buttons{display:flex;gap:10px;margin-top:20px;flex-wrap:wrap;}
+.edit-buttons button{flex:1;padding:12px;min-width:90px;}
+</style>
+</head>
+<body>
+<div class="header">
+<button id="toggleDark">🌓</button>
+<h1>写了吗</h1>
+<div class="subtitle">取其精华 合成糟粕</div>
+</div>
+
+<div class="btns">
+<button class="btn-wanna" id="btnWanna">想写来着</button>
+<button class="btn-done" id="btnDone">真的写了</button>
+</div>
+
+<div class="stat-wrap">
+<div class="stat-title">📊 本月统计</div>
+<div class="stat-row">
+<div>✅ 已写：<span id="cntDone">0</span> 天</div>
+<div>😮‍💨 想写来着：<span id="cntWanna">0</span> 天</div>
+<div>🫥 忘干净了：<span id="cntForget">0</span> 天</div>
+</div>
+<button class="export-btn" id="exportBtn">导出本月记录</button>
+</div>
+
+<div class="calendar-title" id="monthTitle"></div>
+<div class="calendar" id="calendarBox"></div>
+
+<!-- 提示弹窗 -->
+<div class="tip-modal" id="modal">
+<div class="tip-box">
+<div id="msgText"></div>
+<button onclick="closeModal()">收到</button>
+</div>
+</div>
+
+<!-- 补打卡弹窗 -->
+<div class="edit-modal" id="editModal">
+<div class="edit-box">
+<h3 id="editDayTitle"></h3>
+<div class="edit-buttons">
+<button class="btn-wanna" id="editWanna">想写来着</button>
+<button class="btn-done" id="editDone">真的写了</button>
+<button class="btn-forget" id="editForget">哈哈哈，我给忘啦</button>
+</div>
+<button style="margin-top:12px;background:#888;color:#fff" onclick="closeEditModal()">取消</button>
+</div>
+</div>
+
+<script>
+// 扩充阴阳文案库
+const wannaTexts = [
+    "院士还评不评啦！你已经是这个领域的专家了！",
+    "没事，夜班那么累，文献哪有病人香，先放一放。",
+    "课题不急，反正明年申报，还有大把的摸鱼时光。",
+    "别焦虑，大家都没动笔，你不是一个人在拖延。",
+    "灵感会在凌晨三点查房的时候自动浮现，再等等。",
+    "只是暂时搁置，不是放弃，学术大业来日方长。",
+    "临床已经够辛苦了，写东西这种小事，随缘就好。",
+    "先休息，等忙完这一波，一定坐下来好好构思。",
+    "脑子里面框架都有了，只差动手敲字而已。",
+    "审稿人又不会催你，何必为难辛苦的自己。",
+    "想法千千万，落笔最难，拖延是科研人的天赋。",
+    "今晚先好好睡觉，写作这种大事明天再说。",
+    "病历已经写到手软，论文这种精神内耗先暂停。",
+    "临床大牛哪个不是厚积薄发，晚一点动笔怎么了。",
+    "数据都躺在硬盘里，它会乖乖等你有空再来宠幸。",
+    "申报书截止日期还很远，现在动笔属于过早透支。",
+    "今天先保命，科研这种事情留给精力充沛的明天。",
+    "不是不写，是在沉淀，酝酿惊世骇俗的大作。",
+    "医院的活已经填满24小时，别苛责自己还要产出。",
+    "别人卷任别人卷，你先稳住临床，写作随缘。",
+    "思路已经成型，只差一个万籁俱寂的夜晚落笔。",
+    "审稿人看多了急稿，说不定更喜欢慢工出细活。"
+];
+const doneTexts = [
+    "你距离诺贝尔奖又进一步！",
+    "太棒了！审稿人已经开始期待你的大作！",
+    "笔耕不辍，下一个青年拔尖人才就是你！",
+    "临床科研两手抓，主任看了都要夸一句厉害！",
+    "今日产出已达标，学术高楼又添一块砖！",
+    "坚持下去，未来你的论文会被疯狂引用！",
+    "别人在休息，你在耕耘，差距正在悄悄拉开！",
+    "这一笔记录，是你晋升路上坚实的垫脚石！",
+    "科研之路步步前行，每一次动笔都算数！",
+    "继续保持，几年后你的名字写进指南里！",
+    "今日的文字，就是未来答辩台上的底气！",
+    "积少成多，量变马上就要触发质变了！",
+    "夜班间隙还能产出，科研卷王非你莫属！",
+    "病历论文双线作战，你正在悄悄惊艳科室！",
+    "这篇写好，下次基金申报底气直接拉满！",
+    "每敲下一段文字，学术履历就厚重一分！",
+    "坚持住，未来评职称时这段记录闪闪发光！",
+    "别人下班躺平，你悄悄码字，赢麻了！",
+    "数据+文字完美落地，属于你的成果正在诞生！",
+    "持续输出，未来会有后辈引用你的文章！",
+    "临床的积累化为文字，这才是医者的终极浪漫！",
+    "今日的伏案，终会变成简历上亮眼的一笔！"
+];
+// 哈哈哈，我给忘啦 文案
+const forgetTexts = [
+    "好家伙，忙到直接把科研任务从大脑内存清空了！",
+    "没事，病历、抢救、交班占满大脑，遗忘属于正常生理现象。",
+    "记忆选择性屏蔽，这是身体在保护你免于科研焦虑。",
+    "没关系，反正到申报前一周灵感会奇迹般降临。",
+    "大脑自动优先保存患者信息，论文当然被挤出去了。",
+    "忘就忘吧，临床人记忆容量有限，总得舍弃一点东西。",
+    "不用自责，遗忘不是懒惰，是急诊夜班留下的后遗症。",
+    "说不定哪天查房灵光一闪，一次性补齐所有内容。",
+    "硬盘里数据还在，只是你的大脑暂时找不到索引了。",
+    "主任问起就说临床太忙，谁还没有大脑宕机的时候。",
+    "选择性失忆，当代临床大夫自带的防御buff。",
+    "大脑CPU满载运行，科研任务被系统强制后台杀掉。"
+];
+
+const modal = document.getElementById('modal');
+const msgText = document.getElementById('msgText');
+const editModal = document.getElementById('editModal');
+const editDayTitle = document.getElementById('editDayTitle');
+let editTargetDay = null;
+
+function showModal(text){
+    msgText.innerText = text;
+    modal.style.display = 'flex';
+}
+function closeModal(){
+    modal.style.display = 'none';
+}
+function openEditModal(day){
+    editTargetDay = day;
+    editDayTitle.innerText = `补打卡：${day}号`;
+    editModal.style.display = 'flex';
+}
+function closeEditModal(){
+    editModal.style.display = 'none';
+    editTargetDay = null;
+}
+
+// 获取当前年月
+function getNow(){
+    const d = new Date();
+    return {y:d.getFullYear(), m:d.getMonth()};
+}
+const STORAGE_KEY = 'doctor_write_record';
+function getRecords(){
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? JSON.parse(raw) : {};
+}
+function saveRecord(y,m,day,status){
+    const key = `${y}-${m}`;
+    const records = getRecords();
+    if(!records[key]) records[key] = {};
+    records[key][day] = status;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
+}
+
+// 统计本月数据
+function calcStat(){
+    const {y,m} = getNow();
+    const key = `${y}-${m}`;
+    const records = getRecords();
+    const monthData = records[key] || {};
+    let cntDone = 0, cntWanna = 0, cntForget = 0;
+    Object.values(monthData).forEach(s=>{
+        if(s === 'done') cntDone++;
+        if(s === 'wanna') cntWanna++;
+        if(s === 'forget') cntForget++;
+    })
+    document.getElementById('cntDone').innerText = cntDone;
+    document.getElementById('cntWanna').innerText = cntWanna;
+    document.getElementById('cntForget').innerText = cntForget;
+}
+
+// 导出本月记录
+document.getElementById('exportBtn').onclick = function(){
+    const {y,m} = getNow();
+    const key = `${y}-${m}`;
+    const records = getRecords();
+    const monthData = records[key] || {};
+    const exportObj = {
+        year:y,
+        month:m+1,
+        data:monthData
+    };
+    const jsonStr = JSON.stringify(exportObj,null,2);
+    const blob = new Blob([jsonStr],{type:'text/plain'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `写了吗_打卡记录_${y}年${m+1}月.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+}
+
+// 渲染月历
+function renderCalendar(){
+    const {y,m} = getNow();
+    const titleEl = document.getElementById('monthTitle');
+    const box = document.getElementById('calendarBox');
+    titleEl.innerText = `${y}年${m+1}月打卡记录`;
+    box.innerHTML = "";
+    const weekTxt = ["日","一","二","三","四","五","六"];
+    weekTxt.forEach(w=>{
+        const div = document.createElement('div');
+        div.className = "day-item";
+        div.innerText = w;
+        box.appendChild(div);
+    })
+    const firstDay = new Date(y,m,1).getDay();
+    const totalDays = new Date(y,m+1,0).getDate();
+    const today = new Date();
+    const todayDay = today.getDate();
+    const records = getRecords();
+    const monthData = records[`${y}-${m}`] || {};
+
+    for(let i=0;i<firstDay;i++){
+        const div = document.createElement('div');
+        div.className = "day-item";
+        box.appendChild(div);
+    }
+    for(let d=1;d<=totalDays;d++){
+        const div = document.createElement('div');
+        div.className = "day-item";
+        div.innerText = d;
+        const isFuture = d > todayDay;
+        if(isFuture){
+            div.classList.add('day-future');
+        }else{
+            const stat = monthData[d];
+            if(stat === 'done') div.classList.add('day-done');
+            if(stat === 'wanna') div.classList.add('day-wanna');
+            if(stat === 'forget') div.classList.add('day-forget');
+            div.onclick = ()=> openEditModal(d);
+        }
+        box.appendChild(div);
+    }
+    calcStat();
+}
+
+// 补打卡按钮
+document.getElementById('editWanna').onclick = function(){
+    if(editTargetDay === null) return;
+    const {y,m} = getNow();
+    saveRecord(y,m,editTargetDay,'wanna');
+    const randomTxt = wannaTexts[Math.floor(Math.random() * wannaTexts.length)];
+    showModal(randomTxt);
+    closeEditModal();
+    renderCalendar();
+}
+document.getElementById('editDone').onclick = function(){
+    if(editTargetDay === null) return;
+    const {y,m} = getNow();
+    saveRecord(y,m,editTargetDay,'done');
+    const randomTxt = doneTexts[Math.floor(Math.random() * doneTexts.length)];
+    showModal(randomTxt);
+    closeEditModal();
+    renderCalendar();
+}
+document.getElementById('editForget').onclick = function(){
+    if(editTargetDay === null) return;
+    const {y,m} = getNow();
+    saveRecord(y,m,editTargetDay,'forget');
+    const randomTxt = forgetTexts[Math.floor(Math.random() * forgetTexts.length)];
+    showModal(randomTxt);
+    closeEditModal();
+    renderCalendar();
+}
+
+// 今日打卡按钮
+document.getElementById('btnWanna').onclick = function(){
+    const {y,m} = getNow();
+    const day = new Date().getDate();
+    saveRecord(y,m,day,'wanna');
+    const randomTxt = wannaTexts[Math.floor(Math.random() * wannaTexts.length)];
+    showModal(randomTxt);
+    renderCalendar();
+}
+document.getElementById('btnDone').onclick = function(){
+    const {y,m} = getNow();
+    const day = new Date().getDate();
+    saveRecord(y,m,day,'done');
+    const randomTxt = doneTexts[Math.floor(Math.random() * doneTexts.length)];
+    showModal(randomTxt);
+    renderCalendar();
+}
+
+// 深色模式切换
+const toggleDark = document.getElementById('toggleDark');
+toggleDark.onclick = function(){
+    document.body.classList.toggle('dark');
+    localStorage.setItem('writeDark', document.body.classList.contains('dark'));
+}
+if(localStorage.getItem('writeDark') === 'true'){
+    document.body.classList.add('dark');
+}
+
+renderCalendar();
+</script>
+</body>
+</html>
