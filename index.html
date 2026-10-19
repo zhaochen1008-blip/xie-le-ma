@@ -2,19 +2,25 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>写了吗</title>
-<!-- iOS桌面图标 -->
-<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
-<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
-<link rel="icon" type="image/png" sizes="512x512" href="icons/icon-512.png">
-<!-- PWA manifest -->
-<link rel="manifest" href="manifest.json">
+
+<!-- iOS PWA 支持 -->
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="写了吗">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#f4f6f8">
+
+<!-- iOS 桌面图标 -->
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png">
+
+<!-- PWA Manifest -->
+<link rel="manifest" href="manifest.json">
+
 <style>
-*{box-sizing:border-box;margin:0;padding:0;font-family:system-ui, sans-serif;}
+*{box-sizing:border-box;margin:0;padding:0;font-family:system-ui, -apple-system, sans-serif;}
 :root{
   --bg:#f4f6f8;
   --card:#fff;
@@ -25,8 +31,6 @@
   --day-done-text:#006400;
   --day-wanna-bg:#ffcece;
   --day-wanna-text:#990000;
-  --day-forget-bg:#d8d8d8;
-  --day-forget-text:#444;
   --day-future:#eee;
 }
 .dark{
@@ -39,41 +43,66 @@
   --day-done-text:#89e894;
   --day-wanna-bg:#5c2020;
   --day-wanna-text:#ffaaaa;
-  --day-forget-bg:#424242;
-  --day-forget-text:#bbbbbb;
   --day-future:#333;
 }
-body{background:var(--bg);color:var(--text);padding:20px;max-width:700px;margin:0 auto;transition:background 0.3s,color 0.3s;}
+html, body {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  overscroll-behavior: none;
+}
+body{
+  background:var(--bg);
+  color:var(--text);
+  padding:20px;
+  padding-top: calc(20px + env(safe-area-inset-top));
+  padding-bottom: calc(20px + env(safe-area-inset-bottom));
+  max-width:700px;
+  margin:0 auto;
+  transition:background 0.3s,color 0.3s;
+  min-height:100vh;
+}
 .header{text-align:center;margin-bottom:24px;position:relative;}
 h1{font-size:32px;color:var(--text);margin-bottom:6px;}
 .subtitle{font-size:18px;color:var(--text-secondary);margin-bottom:20px;}
-#toggleDark{position:absolute;top:0;right:0;border:none;background:transparent;font-size:24px;cursor:pointer;}
-.btns{display:flex;gap:16px;margin-bottom:28px;}
-button{flex:1;padding:18px 10px;font-size:18px;border-radius:12px;border:none;font-weight:bold;cursor:pointer;}
-.btn-wanna{background:#ffc864;color:#222;}
-.btn-done{background:#42b983;color:#fff;}
-.btn-forget{background:#999999;color:#fff;}
+#toggleDark{position:absolute;top:0;right:0;border:none;background:transparent;font-size:24px;cursor:pointer;padding:8px;}
+
+/* 月份切换栏 */
+.month-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.month-nav button{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:8px 16px;font-size:16px;cursor:pointer;color:var(--text);}
+.month-nav button:active{filter:brightness(0.9);}
+.month-nav button:disabled{opacity:0.3;cursor:not-allowed;}
+.month-title{font-size:20px;font-weight:bold;}
+
 .stat-wrap{background:var(--card);padding:16px;border-radius:12px;margin-bottom:20px;border:1px solid var(--border);}
 .stat-title{font-weight:bold;margin-bottom:8px;font-size:17px;}
 .stat-row{display:flex;gap:16px;flex-wrap:wrap;font-size:16px;}
 .export-btn{margin-top:12px;padding:8px 14px;font-size:14px;background:#5271ff;color:#fff;border-radius:8px;flex:none;}
-.calendar-title{font-size:20px;margin-bottom:12px;text-align:center;color:var(--text);}
-.calendar{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;}
-.day-item{padding:12px 4px;text-align:center;border-radius:8px;background:var(--card);border:1px solid var(--border);cursor:pointer;user-select:none;}
-.day-item:hover{filter:brightness(0.95);}
+
+.calendar{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-bottom:20px;}
+.day-item{padding:12px 4px;text-align:center;border-radius:8px;background:var(--card);border:1px solid var(--border);cursor:pointer;user-select:none;font-size:15px;}
+.day-item:active{filter:brightness(0.9);}
 .day-done{background:var(--day-done-bg);color:var(--day-done-text);border-color:#8fdf99;}
 .day-wanna{background:var(--day-wanna-bg);color:var(--day-wanna-text);border-color:#ffaaaa;}
-.day-forget{background:var(--day-forget-bg);color:var(--day-forget-text);border-color:#aaaaaa;}
 .day-future{opacity:0.4;background:var(--day-future);cursor:not-allowed;}
+.day-header{font-weight:bold;color:var(--text-secondary);cursor:default;}
+.day-header:active{filter:none;}
+
 .tip-modal{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.4);display:none;align-items:center;justify-content:center;padding:20px;z-index:99;}
 .tip-box{background:var(--card);padding:30px 24px;border-radius:16px;max-width:420px;text-align:center;font-size:18px;line-height:1.7;color:var(--text);}
 .tip-box button{margin-top:18px;padding:10px 24px;font-size:16px;flex:none;}
-/*补打卡弹窗*/
+
+/* 日期选择弹窗 */
 .edit-modal{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.4);display:none;align-items:center;justify-content:center;padding:20px;z-index:100;}
 .edit-box{background:var(--card);padding:24px;border-radius:16px;max-width:360px;text-align:center;color:var(--text);}
 .edit-box h3{margin-bottom:16px;}
-.edit-buttons{display:flex;gap:10px;margin-top:20px;flex-wrap:wrap;}
-.edit-buttons button{flex:1;padding:12px;min-width:90px;}
+.edit-buttons{display:flex;flex-direction:column;gap:10px;margin-top:20px;}
+.edit-buttons button{padding:14px;border-radius:10px;font-size:17px;font-weight:bold;border:none;cursor:pointer;}
+.btn-wanna{background:#ffc864;color:#222;}
+.btn-done{background:#42b983;color:#fff;}
+.btn-delete{background:#ff6b6b;color:#fff;}
+.btn-cancel{background:#888;color:#fff;}
+
+.longpress-tip{text-align:center;font-size:13px;color:var(--text-secondary);margin-top:8px;}
 </style>
 </head>
 <body>
@@ -83,23 +112,24 @@ button{flex:1;padding:18px 10px;font-size:18px;border-radius:12px;border:none;fo
 <div class="subtitle">准备给学术圈一点小小的震撼</div>
 </div>
 
-<div class="btns">
-<button class="btn-wanna" id="btnWanna">想写来着</button>
-<button class="btn-done" id="btnDone">真的写了</button>
-</div>
-
 <div class="stat-wrap">
 <div class="stat-title">📊 本月统计</div>
 <div class="stat-row">
 <div>✅ 已写：<span id="cntDone">0</span> 天</div>
 <div>😮‍💨 想写来着：<span id="cntWanna">0</span> 天</div>
-<div>🫥 忘干净了：<span id="cntForget">0</span> 天</div>
 </div>
 <button class="export-btn" id="exportBtn">导出本月记录</button>
 </div>
 
-<div class="calendar-title" id="monthTitle"></div>
+<!-- 月份切换 -->
+<div class="month-nav">
+<button id="prevMonth">← 上月</button>
+<div class="month-title" id="monthTitle"></div>
+<button id="nextMonth">下月 →</button>
+</div>
+
 <div class="calendar" id="calendarBox"></div>
+<div class="longpress-tip">💡 长按某天可删除该天记录</div>
 
 <!-- 提示弹窗 -->
 <div class="tip-modal" id="modal">
@@ -109,21 +139,21 @@ button{flex:1;padding:18px 10px;font-size:18px;border-radius:12px;border:none;fo
 </div>
 </div>
 
-<!-- 补打卡弹窗 -->
+<!-- 日期选择弹窗 -->
 <div class="edit-modal" id="editModal">
 <div class="edit-box">
 <h3 id="editDayTitle"></h3>
 <div class="edit-buttons">
-<button class="btn-wanna" id="editWanna">想写来着</button>
 <button class="btn-done" id="editDone">真的写了</button>
-<button class="btn-forget" id="editForget">哈哈哈，我给忘啦</button>
+<button class="btn-wanna" id="editWanna">想写来着</button>
+<button class="btn-delete" id="editDelete">删除记录</button>
+<button class="btn-cancel" onclick="closeEditModal()">取消</button>
 </div>
-<button style="margin-top:12px;background:#888;color:#fff" onclick="closeEditModal()">取消</button>
 </div>
 </div>
 
 <script>
-// 扩充阴阳文案库
+// 阴阳文案库
 const wannaTexts = [
     "院士还评不评啦！你已经是这个领域的专家了！",
     "没事，夜班那么累，文献哪有病人香，先放一放。",
@@ -172,27 +202,22 @@ const doneTexts = [
     "临床的积累化为文字，这才是医者的终极浪漫！",
     "今日的伏案，终会变成简历上亮眼的一笔！"
 ];
-// 新增：哈哈哈，我给忘啦 文案（阴阳风）
-const forgetTexts = [
-    "好家伙，忙到直接把科研任务从大脑内存清空了！",
-    "没事，病历、抢救、交班占满大脑，遗忘属于正常生理现象。",
-    "记忆选择性屏蔽，这是身体在保护你免于科研焦虑。",
-    "没关系，反正到申报前一周灵感会奇迹般降临。",
-    "大脑自动优先保存患者信息，论文当然被挤出去了。",
-    "忘就忘吧，临床人记忆容量有限，总得舍弃一点东西。",
-    "不用自责，遗忘不是懒惰，是急诊夜班留下的后遗症。",
-    "说不定哪天查房灵光一闪，一次性补齐所有内容。",
-    "硬盘里数据还在，只是你的大脑暂时找不到索引了。",
-    "主任问起就说临床太忙，谁还没有大脑宕机的时候。",
-    "选择性失忆，当代临床大夫自带的防御buff。",
-    "大脑CPU满载运行，科研任务被系统强制后台杀掉。"
-];
 
 const modal = document.getElementById('modal');
 const msgText = document.getElementById('msgText');
 const editModal = document.getElementById('editModal');
 const editDayTitle = document.getElementById('editDayTitle');
-let editTargetDay = null; // 当前要补打的日期
+let editTargetDay = null;
+
+// 当前正在浏览的年月
+let viewYear, viewMonth;
+const now = new Date();
+viewYear = now.getFullYear();
+viewMonth = now.getMonth();
+
+// 限制范围：最早2020年1月，最晚2056年6月
+const MIN_Y = 2020, MIN_M = 0;
+const MAX_Y = 2056, MAX_M = 5;
 
 function showModal(text){
     msgText.innerText = text;
@@ -203,7 +228,7 @@ function closeModal(){
 }
 function openEditModal(day){
     editTargetDay = day;
-    editDayTitle.innerText = `补打卡：${day}号`;
+    editDayTitle.innerText = `${viewYear}年${viewMonth+1}月${day}日`;
     editModal.style.display = 'flex';
 }
 function closeEditModal(){
@@ -211,11 +236,6 @@ function closeEditModal(){
     editTargetDay = null;
 }
 
-// 获取当前年月
-function getNow(){
-    const d = new Date();
-    return {y:d.getFullYear(), m:d.getMonth()};
-}
 const STORAGE_KEY = 'doctor_write_record';
 function getRecords(){
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -225,132 +245,179 @@ function saveRecord(y,m,day,status){
     const key = `${y}-${m}`;
     const records = getRecords();
     if(!records[key]) records[key] = {};
-    records[key][day] = status; // done / wanna / forget
+    if(status === null){
+        delete records[key][day];
+    }else{
+        records[key][day] = status;
+    }
     localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
 }
 
-// 统计本月数据（新增忘记计数）
+// 统计当前浏览月份
 function calcStat(){
-    const {y,m} = getNow();
-    const key = `${y}-${m}`;
+    const key = `${viewYear}-${viewMonth}`;
     const records = getRecords();
     const monthData = records[key] || {};
-    let cntDone = 0, cntWanna = 0, cntForget = 0;
+    let cntDone = 0, cntWanna = 0;
     Object.values(monthData).forEach(s=>{
         if(s === 'done') cntDone++;
         if(s === 'wanna') cntWanna++;
-        if(s === 'forget') cntForget++;
     })
     document.getElementById('cntDone').innerText = cntDone;
     document.getElementById('cntWanna').innerText = cntWanna;
-    document.getElementById('cntForget').innerText = cntForget;
 }
 
 // 导出本月记录
 document.getElementById('exportBtn').onclick = function(){
-    const {y,m} = getNow();
-    const key = `${y}-${m}`;
+    const key = `${viewYear}-${viewMonth}`;
     const records = getRecords();
     const monthData = records[key] || {};
     const exportObj = {
-        year:y,
-        month:m+1,
-        data:monthData
+        year: viewYear,
+        month: viewMonth+1,
+        data: monthData
     };
     const jsonStr = JSON.stringify(exportObj,null,2);
     const blob = new Blob([jsonStr],{type:'text/plain'});
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `写了吗_打卡记录_${y}年${m+1}月.txt`;
+    a.download = `写了吗_打卡记录_${viewYear}年${viewMonth+1}月.txt`;
     a.click();
     URL.revokeObjectURL(url);
 }
 
 // 渲染月历
 function renderCalendar(){
-    const {y,m} = getNow();
-    const titleEl = document.getElementById('monthTitle');
+    document.getElementById('monthTitle').innerText = `${viewYear}年${viewMonth+1}月`;
     const box = document.getElementById('calendarBox');
-    titleEl.innerText = `${y}年${m+1}月打卡记录`;
     box.innerHTML = "";
+
+    // 更新月份按钮状态
+    document.getElementById('prevMonth').disabled = (viewYear === MIN_Y && viewMonth === MIN_M);
+    document.getElementById('nextMonth').disabled = (viewYear === MAX_Y && viewMonth === MAX_M);
+
     const weekTxt = ["日","一","二","三","四","五","六"];
     weekTxt.forEach(w=>{
         const div = document.createElement('div');
-        div.className = "day-item";
+        div.className = "day-item day-header";
         div.innerText = w;
         box.appendChild(div);
     })
-    const firstDay = new Date(y,m,1).getDay();
-    const totalDays = new Date(y,m+1,0).getDate();
-    const today = new Date();
-    const todayDay = today.getDate();
-    const records = getRecords();
-    const monthData = records[`${y}-${m}`] || {};
 
+    const firstDay = new Date(viewYear, viewMonth, 1).getDay();
+    const totalDays = new Date(viewYear, viewMonth+1, 0).getDate();
+
+    // 判断当前浏览月是不是未来的月（不允许打卡）
+    const nowDate = new Date();
+    const curY = nowDate.getFullYear();
+    const curM = nowDate.getMonth();
+    const curD = nowDate.getDate();
+    const isFutureMonth = (viewYear > curY) || (viewYear === curY && viewMonth > curM);
+
+    const records = getRecords();
+    const monthData = records[`${viewYear}-${viewMonth}`] || {};
+
+    // 月初空白
     for(let i=0;i<firstDay;i++){
         const div = document.createElement('div');
         div.className = "day-item";
         box.appendChild(div);
     }
-    for(let d=1;d<=totalDays;d++){
+
+    for(let d=1; d<=totalDays; d++){
         const div = document.createElement('div');
         div.className = "day-item";
         div.innerText = d;
-        const isFuture = d > todayDay;
+
+        // 判断是否未来日期（不能打卡）
+        const isFuture = isFutureMonth || (viewYear === curY && viewMonth === curM && d > curD);
+
         if(isFuture){
             div.classList.add('day-future');
         }else{
             const stat = monthData[d];
             if(stat === 'done') div.classList.add('day-done');
             if(stat === 'wanna') div.classList.add('day-wanna');
-            if(stat === 'forget') div.classList.add('day-forget');
-            // 点击过往日期打开补打卡
-            div.onclick = ()=> openEditModal(d);
+
+            // 单击打开弹窗
+            div.onclick = () => openEditModal(d);
+
+            // 长按删除
+            let pressTimer;
+            div.addEventListener('touchstart', ()=>{
+                pressTimer = setTimeout(()=>{
+                    if(monthData[d]){
+                        if(confirm(`删除 ${viewMonth+1}月${d}日 的记录？`)){
+                            saveRecord(viewYear, viewMonth, d, null);
+                            showModal("已删除记录，当作没发生过吧。");
+                            renderCalendar();
+                        }
+                    }
+                }, 600);
+            });
+            div.addEventListener('touchend', ()=> clearTimeout(pressTimer));
+            div.addEventListener('touchmove', ()=> clearTimeout(pressTimer));
+            // 桌面端右键也能删
+            div.addEventListener('contextmenu', (e)=>{
+                e.preventDefault();
+                if(monthData[d]){
+                    if(confirm(`删除 ${viewMonth+1}月${d}日 的记录？`)){
+                        saveRecord(viewYear, viewMonth, d, null);
+                        showModal("已删除记录，当作没发生过吧。");
+                        renderCalendar();
+                    }
+                }
+            });
         }
         box.appendChild(div);
     }
     calcStat();
 }
 
-// 补打卡弹窗按钮【哈哈哈，我给忘啦】
-document.getElementById('editForget').onclick = function(){
-    if(editTargetDay === null) return;
-    const {y,m} = getNow();
-    saveRecord(y,m,editTargetDay,'forget');
-    const randomTxt = forgetTexts[Math.floor(Math.random() * forgetTexts.length)];
-    showModal(randomTxt);
-    closeEditModal();
+// 月份切换
+document.getElementById('prevMonth').onclick = function(){
+    viewMonth--;
+    if(viewMonth < 0){ viewMonth = 11; viewYear--; }
     renderCalendar();
-}
+};
+document.getElementById('nextMonth').onclick = function(){
+    viewMonth++;
+    if(viewMonth > 11){ viewMonth = 0; viewYear++; }
+    renderCalendar();
+};
 
-// 补打卡原有按钮
-document.getElementById('editWanna').onclick = function(){
-    if(editTargetDay === null) return;
-    const {y,m} = getNow();
-    saveRecord(y,m,editTargetDay,'wanna');
-    const randomTxt = wannaTexts[Math.floor(Math.random() * wannaTexts.length)];
-    showModal(randomTxt);
-    closeEditModal();
-    renderCalendar();
-}
+// 弹窗里的按钮
 document.getElementById('editDone').onclick = function(){
     if(editTargetDay === null) return;
-    const {y,m} = getNow();
-    saveRecord(y,m,editTargetDay,'done');
+    saveRecord(viewYear, viewMonth, editTargetDay, 'done');
     const randomTxt = doneTexts[Math.floor(Math.random() * doneTexts.length)];
-    showModal(randomTxt);
     closeEditModal();
+    showModal(randomTxt);
+    renderCalendar();
+}
+document.getElementById('editWanna').onclick = function(){
+    if(editTargetDay === null) return;
+    saveRecord(viewYear, viewMonth, editTargetDay, 'wanna');
+    const randomTxt = wannaTexts[Math.floor(Math.random() * wannaTexts.length)];
+    closeEditModal();
+    showModal(randomTxt);
+    renderCalendar();
+}
+document.getElementById('editDelete').onclick = function(){
+    if(editTargetDay === null) return;
+    saveRecord(viewYear, viewMonth, editTargetDay, null);
+    closeEditModal();
+    showModal("已删除记录，当作没发生过吧。");
     renderCalendar();
 }
 
-// 深色模式切换
+// 深色模式
 const toggleDark = document.getElementById('toggleDark');
 toggleDark.onclick = function(){
     document.body.classList.toggle('dark');
     localStorage.setItem('writeDark', document.body.classList.contains('dark'));
 }
-// 读取深色模式记忆
 if(localStorage.getItem('writeDark') === 'true'){
     document.body.classList.add('dark');
 }
